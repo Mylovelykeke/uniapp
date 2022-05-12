@@ -1,0 +1,27 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*每个页面公共css */
+@font-face {
+	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+page {
+	background: rgba(240, 242, 245, 1);
+}
+.content {
+	padding: 40rpx;
+	box-sizing: border-box;
+}
+

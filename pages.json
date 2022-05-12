@@ -1,0 +1,57 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		
+		{
+			"path": "pages/home",
+			"style": {
+				"navigationBarTitleText": "收支明细"
+			}
+		},
+		{
+			"path": "pages/other/index",
+			"style": {
+				"navigationBarTitleText": "账本",
+				"enablePullDownRefresh": false
+			}
+		
+		},{
+			"path": "pages/detail/detail",
+			"style": {
+				"navigationBarTitleText": "详情",
+				"enablePullDownRefresh": false
+			}
+
+		},
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "详情",
+				"enablePullDownRefresh": false
+			}
+
+		}
+	],
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "生活笔记",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8"
+	},
+	"tabBar": {
+		"color": "#707070",
+		"selectedColor": "#eb8f0e",
+		"borderStyle": "black",
+		"backgroundColor": "#ffffff",
+		"list": [{
+			"pagePath": "pages/home",
+			"iconPath": "static/image/mx02.png",
+			"selectedIconPath": "static/image/mx01.png",
+			"text": "明细"
+		}, {
+			"pagePath": "pages/other/index",
+			"iconPath": "static/image/zb02.png",
+			"selectedIconPath": "static/image/zb01.png",
+			"text": "账本"
+		}]
+	}
+}
