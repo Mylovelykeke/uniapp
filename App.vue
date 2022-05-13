@@ -1,7 +1,6 @@
 <script>
 	export default {
 		onLaunch: function() {
-			uni.hideTabBar()
 			// console.log('App Launch');
 			// //app启动时打开启动广告页
 			// var w = plus.webview.open(
@@ -16,9 +15,6 @@
 			// 	plus.webview.close(w);
 			// }, 4000);
 		},
-		onLoad:function() {
-			uni.hideTabBar()
-		},
 		onShow: function() {
 			console.log('App Show')
 		},
@@ -30,6 +26,8 @@
 
 <style>
 	@import "@/static/font/iconfont.css";
+	@import "@/static/font/iconfont-weapp-icon.css";
+
 	/*每个页面公共css */
 	@font-face {
 		font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;

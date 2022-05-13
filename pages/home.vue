@@ -76,16 +76,13 @@
 				</view>
 			</view>
 		</view>
-		<uni-fab ref="fab" :pattern="pattern" :horizontal="horizontal" :vertical="vertical" />
+		<uni-fab ref="fab" :pattern="pattern" :horizontal="horizontal" :vertical="vertical" @fabClick="onClickEditor"/>
 
 	</view>
 </template>
 
 <script>
 	export default {
-		onLoad() {
-			uni.hideTabBar()
-		},
 		data() {
 			return {
 				horizontal: 'right',
@@ -99,10 +96,19 @@
 				type: ["vip-filled", 'medal-filled', 'icon-biaozhangbiaoyang']
 			}
 		},
+		created() {
+
+
+		},
 		methods: {
 			toMonthInfo() {
 				uni.navigateTo({
 					url: '/pages/detail/detail'
+				})
+			},
+			onClickEditor(){
+				uni.navigateTo({
+					url:"/pages/editor/editor"
 				})
 			}
 		}
@@ -155,7 +161,7 @@
 
 		.year {
 			background: linear-gradient(135deg, rgba(255, 97, 97, 1) 0%, rgba(227, 43, 43, 1.0) 100%);
-			box-shadow: 0 35px 10px -20px #e7b8b8;
+			box-shadow: 0 35px 10px -25px #e7b8b8;
 			line-height: 2;
 			border-radius: 17px;
 			color: white;
@@ -167,7 +173,6 @@
 			// backdrop-filter: blur(150px); 
 			border-radius: 12px;
 			// box-shadow: 0px 4px 16px rgba(239, 245, 255, 1);
-			box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
 
 			.line {
 				margin: 0 auto;
@@ -206,21 +211,23 @@
 				padding: 10rpx 32rpx;
 				margin-bottom: 10px;
 				border-radius: 17px;
+				background-color: #fff;
+				box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
 
-				&:nth-child(3n+1) {
-					background-color: rgba(230, 245, 255, 1);
-					border: 1px solid rgba(172, 205, 227, 1);
-				}
+				// &:nth-child(3n+1) {
+				// 	background-color: rgba(230, 245, 255, 1);
+				// 	border: 1px solid rgba(172, 205, 227, 1);
+				// }
 
-				&:nth-child(3n+2) {
-					background-color: rgba(241, 230, 212, 1);
-					border: 1px solid rgba(229, 200, 150, 1);
-				}
+				// &:nth-child(3n+2) {
+				// 	background-color: rgba(241, 230, 212, 1);
+				// 	border: 1px solid rgba(229, 200, 150, 1);
+				// }
 
-				&:nth-child(3n+3) {
-					background-color: rgba(255, 236, 230, 1);
-					border: 1px solid rgba(243, 203, 191, 1);
-				}
+				// &:nth-child(3n+3) {
+				// 	background-color: rgba(255, 236, 230, 1);
+				// 	border: 1px solid rgba(243, 203, 191, 1);
+				// }
 
 				.next__item--left {
 					width: 40px;
@@ -246,7 +253,7 @@
 		.current {
 			position: relative;
 			background-color: #fff;
-
+			box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
 			@include card--padding;
 
 			.text--title {
