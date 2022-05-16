@@ -1,11 +1,11 @@
 <template>
-	<view class="keyboard">
-		<view class="keyboard_title">
+	<view class="keyboard" @click.stop>
+		<view class="keyboard_title" @click="confirm()">
 			<text>完成</text>
 		</view>
 		<view class="btn" v-for="v in arr" :key="v">
-			<view class="btn_key" :class="{focus:v === 'delete'}" @click="onKeyCode(v)">
-				<uni-icons v-if="v === 'delete'" type="trash" size="30"></uni-icons>
+			<view class="btn_key" :class="{focus:v === 'delete'}" @click.stop="onKeyCode(v)">
+				<text v-if="v === 'delete'" class="iconfont icon-delete"></text>
 				<text v-else>{{v}}</text>
 			</view>
 		</view>
@@ -23,6 +23,9 @@
 		methods:{
 			onKeyCode(value){
 				this.$emit('change',value)
+			},
+			confirm(){
+				this.$emit('confirm')
 			}
 		}
 	}
@@ -45,18 +48,23 @@
 			display: inline-block;
 			box-sizing: border-box;
 			width: 33.3%;
-			padding: 2px;
+			padding: 3px 2px;
 
 			.btn_key {
 				background-color: #fff;
 				border-radius: 5px;
 				height: 100rpx;
-				text-align: center;
 				line-height: 100rpx;
-				font-size: 20px;
-				overflow: hidden;
+				text-align: center;
+				font-size: 28px;
+				.iconfont{
+					font-size: 28px;
+				}
 				&.focus {
 					background-color: #acaeb0;
+				}
+				&:active{
+					opacity: .7;
 				}
 			}
 

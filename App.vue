@@ -1,6 +1,9 @@
 <script>
+	import {
+		closeDB
+	} from './api/sqlite/sqlite.js'
 	export default {
-		onLaunch: function() {
+		onLaunch: async function() {
 			// console.log('App Launch');
 			// //app启动时打开启动广告页
 			// var w = plus.webview.open(
@@ -19,6 +22,9 @@
 			console.log('App Show')
 		},
 		onHide: function() {
+			try {
+				closeDB()
+			} catch {}
 			console.log('App Hide')
 		}
 	}
