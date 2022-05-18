@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+		<title>附件导入</title>
+		<style type="text/css">
+			.btn {
+				display: block;
+				margin: 20px auto;
+				padding: 5px;
+				background-color: #007aff;
+				border: 0;
+				color: #ffffff;
+				height: 40px;
+				width: 200px;
+			}
+
+			.btn-red {
+				background-color: #dd524d;
+			}
+
+			.btn-yellow {
+				background-color: #f0ad4e;
+			}
+
+			.desc {
+				padding: 10px;
+				color: #999999;
+			}
+
+			.post-message-section {
+				visibility: hidden;
+			}
+
+			.nav {
+				margin-top: 60px;
+			}
+
+			.btn {
+				position: relative;
+				top: 0;
+				left: 0;
+				bottom: 0;
+				right: 0;
+			}
+
+			.btn .file {
+				position: fixed;
+				z-index: 93;
+				left: 0;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+				opacity: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<p class="desc">点击下方导入文件按钮，选择相应的xls，csv文件进行导入即可</p>
+		<div class="btn-list">
+			<div id="content" class="content">
+				22222222
+				<div v-show="!disabled" class="btn">
+					<input  ref="file" class="file" type="file" />
+				</div>
+			</div>
+		</div>
+		<div class="post-message-section">
+			<p class="desc">网页向应用发送消息，注意：小程序端应用会在此页面后退时接收到消息。</p>
+			<div class="btn-list">
+				<button class="btn btn-red" type="button" id="postMessage">postMessage</button>
+			</div>
+		</div>
+		<script type="text/javascript" src="./js/ploy.js"></script>
+		<script src="./js/xlsx.mini.min.js"></script>
+		<script type="text/javascript" src="https://unpkg.com/@dcloudio/uni-webview-js@0.0.2/index.js"></script>
+		<script type="text/javascript">
+			function readWorkbook(workbook) {
+				var sheetContent = []
+				// 遍历每张表读取
+				for (var sheet in workbook.Sheets) {
+					if (workbook.Sheets.hasOwnProperty(sheet)) {
+						fromTo = workbook.Sheets[sheet]['!ref'];
+						sheetContent.push(XLSX.utils.sheet_to_json(workbook.Sheets[sheet]))
+						// break; // 如果只取第一张表，就取消注释这行
+					}
+				}
+				return sheetContent
+			}
+			document.addEventListener('UniAppJSBridgeReady', function() {
+				document.getElementsByClassName('file')[0].addEventListener('change', async function(event) {
+					var files = event.target.files
+					if (files.length <= 0) {
+						return
+					}
+					var file = files[0]
+					let types = file.name.split(".")
+					let type = types[types.length - 1]
+					if (['csv', 'xls', 'xlsx'].indexOf(type) < 0) {
+						//用你选择组件的报错弹窗就行，报出以下提醒
+						plus.nativeUI.alert("文件错误");
+						return;
+					}
+					var reader = new FileReader();
+					reader.onload = function(e) {
+						var data = e.target.result;
+						/* reader.readAsArrayBuffer(file) -> data will be an ArrayBuffer */
+						var workbook = XLSX.read(e.target.result, {
+							cellDates: true,
+							raw:true
+						});
+						var result = readWorkbook(workbook)
+						uni.postMessage({
+							data: {
+								excel: result
+							}
+						});
+						/* DO SOMETHING WITH workbook HERE */
+					};
+					reader.readAsArrayBuffer(file);
+				})
+
+			});
+
+			// 	function handleFilechange(e){
+			// alert(22222)
+			// 	}
+		</script>
+	</body>
+</html>

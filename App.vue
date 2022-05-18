@@ -3,28 +3,17 @@
 		closeDB
 	} from './api/sqlite/sqlite.js'
 	export default {
-		onLaunch: async function() {
-			// console.log('App Launch');
-			// //app启动时打开启动广告页
-			// var w = plus.webview.open(
-			// 	'hybrid/html/advertise/advertise.html',
-			// 	'本地地址',
-			// 	{ top: 0, bottom: 0, zindex: 999 },
-			// 	'fade-in',
-			// 	500
-			// );
-			// //设置定时器，4s后关闭启动广告页
-			// setTimeout(function() {
-			// 	plus.webview.close(w);
-			// }, 4000);
+		onLaunch:function() {
 		},
 		onShow: function() {
 			console.log('App Show')
 		},
 		onHide: function() {
+			// #ifdef APP-PLUS
 			try {
 				closeDB()
 			} catch {}
+			// #endif
 			console.log('App Hide')
 		}
 	}
@@ -40,7 +29,7 @@
 	}
 
 	page {
-		background: rgba(240, 242, 245, 1);
+		background: rgba(245, 245, 245, 1.0);
 	}
 
 	.content {

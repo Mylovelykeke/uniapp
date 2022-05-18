@@ -1,35 +1,42 @@
 <template>
-	<view class="content">
-		<view class="detail_card">
-			<view class="detail_radio">
-				<text class="t-icon" :class="iconName"></text>
-				<text class="detail_title">{{title}}</text>
-			</view>
-			<view class="detail_unit">
-				<text>-</text>
-				<text>{{detail.PRICE}}</text>
-			</view>
-			<view class="balance">
-				<text>余额:8000</text>
-			</view>
-			<view class="list">
-				<view class="item">
-					<text class="text--default">类别</text>
-					<text v-if="detail">{{detail.INCOREXP ==0?'支出':'收入' }}</text>
+	<view>
+		<view class="content">
+			<CustomTitle>
+				<template v-slot:left>
+					<uni-icons type="left" size="20" @click="goback()"></uni-icons>
+				</template>
+			</CustomTitle>
+			<view class="detail_card">
+				<view class="detail_radio">
+					<text class="t-icon" :class="iconName"></text>
+					<text class="detail_title">{{title}}</text>
 				</view>
-				<view class="item">
-					<text class="text--default">账本</text>
-					<text>{{detail.NOTESTYPE == 0?'默认账本':''}}</text>
+				<view class="detail_unit">
+					<text>-</text>
+					<text>{{detail.PRICE}}</text>
 				</view>
-				<view class="item">
-					<text class="text--default">创建时间</text>
-					<text>{{detail.CREATEDATE}}</text>
+				<view class="balance">
+					<!-- <text>余额:8000</text> -->
 				</view>
-			</view>
-			<view class="remark">
-				<text class="text--default">备注</text>
-				<view style="line-height: 1.5;padding-top: 10rpx;">
-					<text>{{detail.REMARK}}</text>
+				<view class="list">
+					<view class="item">
+						<text class="text--default">类别</text>
+						<text v-if="detail">{{detail.INCOREXP ==0?'支出':'收入' }}</text>
+					</view>
+					<view class="item">
+						<text class="text--default">账本</text>
+						<text>{{detail.NOTESTYPE == 0?'默认账本':''}}</text>
+					</view>
+					<view class="item">
+						<text class="text--default">创建时间</text>
+						<!-- <text>{{detail.CREATEDATE}}</text> -->
+					</view>
+				</view>
+				<view class="remark">
+					<text class="text--default">备注</text>
+					<view style="line-height: 1.5;padding-top: 10rpx;">
+						<text>{{detail.REMARK}}</text>
+					</view>
 				</view>
 			</view>
 		</view>
@@ -43,8 +50,11 @@
 	import {
 		icons
 	} from '../../utils/config.js'
+	import CustomTitle from '@/components/CustomTitle.vue'
 	export default {
-
+		components: {
+			CustomTitle
+		},
 		data() {
 			return {
 				detail: {
@@ -78,19 +88,26 @@
 				return ''
 			}
 		},
-		onLoad(options) {
-			this.getDetail(options.id)
-		},
 
 		methods: {
 			async getDetail(id) {
 				try {
 					let res = await fetchDetail(id)
-					this.detail = res[0]
+					if (res.status == 200) {
+						this.detail = res.data[0]
+					}
 				} catch (e) {
 					console.log(e)
 				}
 			}
+		},
+
+		onLoad(options) {
+			this.getDetail(options.id)
+		},
+		
+		goback() {
+			uni.navigateBack()
 		}
 	}
 </script>
@@ -104,7 +121,7 @@
 		margin-top: 20px;
 		padding-top: 70px;
 		position: relative;
-		height: 300px;
+		min-height: 300px;
 		border-radius: 12px;
 		background-color: #fff;
 

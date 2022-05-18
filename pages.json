@@ -44,16 +44,36 @@
             }
             
         }
+        ,{
+            "path" : "pages/uploadFile/uploadFile",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/budget/budget",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	"globalStyle": {
+		"navigationStyle": "custom",
 		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "生活笔记",
 		"navigationBarBackgroundColor": "#F8F8F8",
 		"backgroundColor": "#F8F8F8"
 	},
 	"tabBar": {
-		"color": "#707070",
-		"selectedColor": "#2a1901",
+		"fontSize":"12px",
+		"color": "#626262",
+		"selectedColor": "#211300",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{

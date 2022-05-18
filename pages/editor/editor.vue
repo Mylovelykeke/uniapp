@@ -1,5 +1,10 @@
 <template>
 	<view class="content" @click="onClose">
+		<CustomTitle>
+			<template v-slot:left>
+				<uni-icons type="left" size="20" @click="goback()"></uni-icons>
+			</template>
+		</CustomTitle>
 		<!-- 输入框 -->
 		<view class="editor__price">
 			<text class="editor__text">交易金额</text>
@@ -32,31 +37,34 @@
 		<view class="editor__remark">
 			<text class="editor__text">备注</text>
 			<textarea v-model="remark" placeholder="写点什么..." cols="30" rows="10"></textarea>
+			<view v-for="(val,index) in tempFilePaths" class="editor__remark_extra">
+				<view @click="previewImage(index)">
+					<uni-icons type="images" size="20"></uni-icons>
+					<text>&nbsp;&nbsp;附件{{index + 1}}</text>
+				</view>
+				<uni-icons type="close" size="24" @click="removeImage(index)"></uni-icons>
+			</view>
 		</view>
 		<!-- 时间选中 -->
 		<view>
 			<uni-datetime-picker return-type="timestamp" v-model="time" type="date" :end="endTime" :border="false" />
 		</view>
-		
+
 		<!-- 账本选中 -->
-		
 		<view class="editor__footer">
-			<view :class="{disabled:disabled}" @click="save">确定添加</view>
+			<view class="editor__footer_text" @click="selectImage">
+				<uni-icons type="images" size="24" color="#ff4e4f"></uni-icons>
+				<text>图片</text>
+			</view>
+			<view class="editor__footer_text" style="color: #000;" @click="save(true)">
+				<text>再记一笔</text>
+			</view>
+			<view class="editor_btn" :class="{disabled:disabled}" @click="save(false)">确定添加</view>
 		</view>
 		<uni-popup ref="popup" type="bottom">
 			<!-- 键盘 -->
-			<InputNumber @change="onInputNumer" @confirm="onClose"/>
+			<InputNumber @change="onInputNumer" @confirm="onClose" />
 		</uni-popup>
-		<uni-popup ref="dialog" type="message">
-			<uni-popup-message type="success" message="添加成功" :duration="2000"></uni-popup-message>
-		</uni-popup>
-		<!-- 		<uni-transition mode-class="slide-bottom" :show="show">
-			<view style="position: fixed; z-index: 999;">
-			<InputNumber />
-			</view>
-		</uni-transition> -->
-		<!-- <button @click="save">222222222222</button>
-		<button @click="save1">search</button> -->
 	</view>
 </template>
 
@@ -66,14 +74,18 @@
 		editorToAdd,
 		getNotesList
 	} from '../../api/editor.js'
-	import { icons} from '../../utils/config.js'
+	import {
+		icons
+	} from '../../utils/config.js'
 	import moment from '../../utils/moment.js'
+	import CustomTitle from '@/components/CustomTitle.vue'
 	export default {
 		components: {
-			InputNumber
+			InputNumber,
+			CustomTitle
 		},
 		computed: {
-			endTime(){
+			endTime() {
 				return moment(moment().add(15, 'days')).valueOf('x')
 			},
 			unit() {
@@ -122,18 +134,25 @@
 				incOrExp: 0, //支出或收入
 				remark: '',
 				notesType: 0,
-				time:new Date().getTime(),
+				time: new Date().getTime(),
 				focus: false,
-				icons: icons
+				icons: icons,
+				tempFilePaths: []
+
 			};
 		},
+		mounted() {
+
+			// uniCloud.database()
+		},
 		methods: {
-			save1() {
-				getNotesList()
-			},
-			save() {
+			save(flag) {
+				if (!this.price) {
+					return
+				}
+				uni.vibrateShort()
 				let timestamp = this.time
-				if(!this.time){
+				if (!this.time) {
 					timestamp = new Date().getTime()
 				}
 				let params = {
@@ -145,9 +164,19 @@
 					updateDate: timestamp
 				}
 				editorToAdd(params).then(res => {
-					this.$refs.dialog.open()
-				}).catch((e)=>{
-					
+					// 再记一笔
+					if (flag) {
+						uni.showToast({
+							title: '再记一笔！',
+							icon:'none',
+							duration: 2000
+						});
+						Object.assign(this.$data, this.$options.data()) 
+					} else {
+						uni.navigateBack()
+					}
+				}).catch((e) => {
+					console.log(e, '=============>')
 				})
 			},
 			onInputNumer(value) {
@@ -173,10 +202,6 @@
 				}
 				this.price = val.slice(0, -1)
 			},
-
-			onfoucs() {
-				uni.hideKeyboard()
-			},
 			selectIcon(name) {
 				this.iconType = name
 			},
@@ -190,6 +215,36 @@
 			onClose() {
 				this.focus = false
 				this.$refs.popup.close('bottom')
+			},
+			// 获取上传状态
+			selectImage() {
+				let that = this;
+				let count = 3 - this.tempFilePaths.length
+				if (!count) {
+					return
+				}
+				uni.chooseImage({
+					count,
+					sizeType: ['compressed'],
+					success(res) {
+						that.tempFilePaths.push(...res.tempFilePaths)
+					},
+					fail(err) {
+						console.log(err)
+					}
+				})
+			},
+			removeImage(index) {
+				this.tempFilePaths.splice(index, 1)
+			},
+			previewImage(idx) {
+				uni.previewImage({
+					current: idx,
+					urls: this.tempFilePaths
+				});
+			},
+			goback() {
+				uni.navigateBack()
 			}
 		}
 	}
@@ -217,7 +272,7 @@
 				position: relative;
 				display: flex;
 				align-items: center;
-				font-size: 80rpx;
+				font-size: 70rpx;
 				font-weight: 600;
 				line-height: 1.8;
 
@@ -288,7 +343,7 @@
 		.editor__title {
 			background-color: $bgcolor;
 			padding: 10rpx 32rpx;
-			margin-bottom: 2px;
+			margin-bottom: 1px;
 
 			text {
 				display: inline-block;
@@ -330,14 +385,28 @@
 
 		.editor__remark {
 			background-color: #fff;
-			margin-top: 2px;
+			margin: 1px 0;
 			padding: 20rpx 32rpx;
 			box-sizing: border-box;
-			margin-bottom: 2px;
+
 			textarea {
 				width: 100%;
 				height: 100px;
 			}
+
+			.editor__remark_extra {
+				display: flex;
+				justify-content: space-between;
+				font-size: 14px;
+				align-items: center;
+				line-height: 1.8;
+			}
+		}
+
+		.select_file {
+			// width: 40px;
+			// height: 40px;
+			background-color: #fff;
 		}
 
 		.editor__footer {
@@ -349,9 +418,17 @@
 			justify-content: flex-end;
 			box-sizing: border-box;
 			background-color: #fff;
-			border-top: 1px solid #e4e4e4;
+			border-top: 1px solid #f7f7f7;
 
-			view {
+			.editor__footer_text {
+				display: flex;
+				align-items: center;
+				color: #ff7245;
+				font-size: 14px;
+				margin-right: 20px;
+			}
+
+			.editor_btn {
 				text-align: center;
 				line-height: 40px;
 				border-radius: 20px;

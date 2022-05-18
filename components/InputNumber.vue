@@ -23,6 +23,9 @@
 		methods:{
 			onKeyCode(value){
 				this.$emit('change',value)
+				uni.vibrateShort({
+					success: function () {}
+				});
 			},
 			confirm(){
 				this.$emit('confirm')
@@ -33,7 +36,8 @@
 
 <style lang="scss">
 	.keyboard {
-		background-color: #e0e0e0;
+		background-color: #f7f7f7;
+		padding-bottom: 10rpx;
 		.keyboard_title {
 			padding: 20rpx 32rpx;
 			display: flex;
@@ -48,23 +52,22 @@
 			display: inline-block;
 			box-sizing: border-box;
 			width: 33.3%;
-			padding: 3px 2px;
-
+			padding:0px 1px 2px 1px;
 			.btn_key {
 				background-color: #fff;
 				border-radius: 5px;
 				height: 100rpx;
 				line-height: 100rpx;
 				text-align: center;
-				font-size: 28px;
+				font-size: 24px;
 				.iconfont{
 					font-size: 28px;
 				}
 				&.focus {
-					background-color: #acaeb0;
+					background-color: #cbcdcf;
 				}
 				&:active{
-					opacity: .7;
+					background-color: #efeff0;
 				}
 			}
 

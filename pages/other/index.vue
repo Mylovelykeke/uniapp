@@ -1,29 +1,33 @@
 <template>
-	<view class="content">
-		<view class="card">
-			
-		</view>
+	<view>
+		<CustomTitle>
+			<template v-slot:right>
+				<uni-icons @click="uploadFile" customPrefix="iconfont" type="icon--daoru" size="26" style="margin-right: 20rpx;"
+					color="rgb(71 68 68)"></uni-icons>
+				<uni-icons customPrefix="iconfont" type="icon-shezhi" size="24" color="#000"
+					style="margin-right: 20rpx;"></uni-icons>
+			</template>
+		</CustomTitle>
 	</view>
 </template>
-
 <script>
+	import CustomTitle from '@/components/CustomTitle.vue'
 	export default {
-		data() {
-			return {
-				
-			}
+		components: {
+			CustomTitle
 		},
-		methods: {
-			
+		data() {
+			return {}
+		},
+		methods:{
+			uploadFile(){
+				uni.navigateTo({
+					url:"/pages/uploadFile/uploadFile"
+				})
+			}
 		}
 	}
 </script>
+<style>
 
-<style lang="scss" scoped>
-	.card{
-		width: 338px;
-		height: 70px;
-		mix-blend-mode: normal;
-		background: rgba(255, 224, 226, 1);
-	}
 </style>

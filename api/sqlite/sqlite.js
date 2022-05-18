@@ -28,6 +28,7 @@ function executeSQL(name, sql) {
 				resolve(e)
 			},
 			fail: function(e) {
+				console.log(e),'=>>>>>>>>>'
 				reject(e)
 			}
 		})
@@ -43,6 +44,7 @@ function selectSql(name, sql) {
 				resolve(e)
 			},
 			fail: function(e) {
+				console.log(e)
 				reject(e)
 			}
 		})
@@ -51,7 +53,15 @@ function selectSql(name, sql) {
 
 function closeDB() {
 	return new Promise((resolve, reject) => {
-		plus.sqlite.closeDatabase(options)
+		plus.sqlite.closeDatabase({
+			name:options.name,
+			success:function(e){
+				resolve(e)
+			},
+			fail:function(err){
+				reject(err)
+			}
+		})
 	})
 }
 
