@@ -8,7 +8,7 @@
 			</CustomTitle>
 			<view class="detail_card">
 				<view class="detail_radio">
-					<text class="t-icon" :class="iconName"></text>
+					<text class="t-icon iconfont" :class="iconName" style="color: #ff9799;"></text>
 					<text class="detail_title">{{title}}</text>
 				</view>
 				<view class="detail_unit">
@@ -48,7 +48,8 @@
 		fetchDetail
 	} from '../../api/editor.js'
 	import {
-		icons
+		icons_normal,
+		icons_line
 	} from '../../utils/config.js'
 	import CustomTitle from '@/components/CustomTitle.vue'
 	export default {
@@ -74,6 +75,7 @@
 			iconName() {
 				let d = this.detail.ICONTYPE
 				if (d) {
+					let icons = [...icons_normal, ...icons_line]
 					let res = icons.find(item => item.id == d)
 					return res.name
 				}
@@ -82,6 +84,7 @@
 			title() {
 				let d = this.detail.ICONTYPE
 				if (d) {
+					let icons = [...icons_normal, ...icons_line]
 					let res = icons.find(item => item.id == d)
 					return res.title
 				}
@@ -99,16 +102,16 @@
 				} catch (e) {
 					console.log(e)
 				}
+			},
+
+			goback() {
+				uni.navigateBack()
 			}
 		},
 
 		onLoad(options) {
 			this.getDetail(options.id)
 		},
-		
-		goback() {
-			uni.navigateBack()
-		}
 	}
 </script>
 
@@ -124,7 +127,9 @@
 		min-height: 300px;
 		border-radius: 12px;
 		background-color: #fff;
-
+		.iconfont{
+			font-size: 50px;
+		}
 		.balance {
 			line-height: 2;
 			text-align: center;

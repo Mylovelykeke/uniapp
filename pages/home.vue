@@ -1,6 +1,13 @@
 <template>
-	<view>
-		<CustomTitle />
+	<view id="content">
+		<CustomTitle>
+			<template v-slot:right>
+				<uni-icons customPrefix="iconfont" type="icon-sousuo1" size="22" style="margin-right: 20rpx;"
+					color="#515151"></uni-icons>
+				<uni-icons @click="showCalendar" customPrefix="iconfont" type="icon-yonghuzhongxinicon09" size="22"
+					color="#515151" style="margin-right: 20rpx;"></uni-icons>
+			</template>
+		</CustomTitle>
 		<view class="content-pad">
 			<view class="year" @click="toLink">
 				<view>
@@ -8,7 +15,6 @@
 				</view>
 				<view class="flex text--title">
 					<text>总资产</text>
-					<!-- <text>收支</text> -->
 				</view>
 				<view class="flex text--large">
 					<view>
@@ -23,18 +29,15 @@
 				</view>
 			</view>
 			<view class="current">
-				<view class="flex current--month">
+				<view class="flex">
 					<view class="">
 						<text
 							style="font-size: 80rpx;font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">{{month}}</text>
 						<text>月</text>
 					</view>
-					<view class="" @tap="toMonthInfo">
-						分析
-					</view>
 				</view>
 				<view @click="setCurrentPrice">
-					<text v-if="accountBookInfo.BUDGET" class="text--title">预算额度: &nbsp;￥{{accountBookInfo.BUDGET}}&nbsp;</text>
+					<text v-if="accountBookInfo.BUDGET" class="text--title">预算额度: ￥{{accountBookInfo.BUDGET}}</text>
 					<text v-else class="text--title">设置预算</text>
 					<uni-icons type="forward" size="14"></uni-icons>
 				</view>
@@ -44,28 +47,28 @@
 				</view>
 			</view>
 			<view class="incOrExp flex">
-				<view class="incOrExp_out">
+				<view class="incOrExp_out" @tap="toMonthInfo(0)">
 					<view>
 						<view class="incOrExp_icon">
 							<uni-icons type="pulldown" size="20" color="#fff"></uni-icons>
 						</view>
-						<text class="text-mg">支出</text>
+						<text class="text-mg">本月支出</text>
 					</view>
 					<view>
 						<text>¥</text>
-						<text class="text-mg">{{expend}}</text>
+						<text class="text-mg">{{outPrice}}</text>
 					</view>
 				</view>
-				<view class="incOrExp_inc">
+				<view class="incOrExp_inc" @tap="toMonthInfo(1)">
 					<view>
 						<view class="incOrExp_icon">
 							<uni-icons type="pulldown" size="20" color="#fff"></uni-icons>
 						</view>
-						<text class="text-mg">收入</text>
+						<text class="text-mg">本月收入</text>
 					</view>
 					<view>
 						<text>¥</text>
-						<text class="text-mg">{{income}}</text>
+						<text class="text-mg">{{incPrice}}</text>
 					</view>
 				</view>
 			</view>
@@ -73,18 +76,19 @@
 				<text>收支明细</text>
 			</view>
 		</view>
-		<template v-if="Object.keys(timeObj).length">
-			<view class="next" v-for="(list,key) in timeObj" :key="key">
+		<template v-if="notesList.length">
+			<view class="next" v-for="(val,index) in notesList" :key="val.date">
 				<view class="next__title">
-					<text>{{handDays(key)}}</text>
-					<text class="out">{{handlePrice(list)}}</text>
+					<text>{{handDays(val.date)}}</text>
+					<text class="out" v-if="val.total">{{'-'+val.total}}</text>
 				</view>
 				<uni-swipe-action>
-					<uni-swipe-action-item :right-options="options" v-for="(val,index) in list" :key="val.id"
+					<uni-swipe-action-item :right-options="options" v-for="(val,index) in val.list" :key="val.id"
 						style="border-top: 1px solid #eee;" @click="onClickRemove(val)">
 						<view class="next__item" @click="onClickDetail(val)">
 							<view class="next__item--fix">
-								<uni-icons customPrefix="t-icon" :type="handleIcons(val.ICONTYPE).name" size="30">
+								<uni-icons customPrefix="t-icon iconfont" color="#ff9799"
+									:type="handleIcons(val.ICONTYPE).name" size="30">
 								</uni-icons>
 							</view>
 							<view class="next__item--left"></view>
@@ -99,27 +103,37 @@
 					</uni-swipe-action-item>
 				</uni-swipe-action>
 			</view>
+			<uni-load-more :status="status"></uni-load-more>
 		</template>
 		<view style="height: 300px;background-color: #fff;" v-else></view>
 		<uni-fab ref="fab" :pattern="pattern" :horizontal="horizontal" :vertical="vertical" @fabClick="onClickEditor" />
+		<uni-popup ref="popup" type="top">
+			<view class="calendar-space"></view>
+			<uni-calendar startDate="2010-01-01" :endDate="endDate" :insert="true" :selected="selected"
+				@monthSwitch="monthSwitch" />
+		</uni-popup>
 	</view>
 </template>
 
 <script>
 	import {
 		getNotesList,
-		deleteNote
+		deleteNote,
+		monthTotal,
+		notePrice,
+		notesMonths
 	} from '../api/editor.js'
 	import {
-		icons
+		icons_normal,
+		icons_line
 	} from '../utils/config.js'
 	import {
 		UserInfo
 	} from '../api/user.js'
 	import {
-		accountBookList
+		accountBook
 	} from '../api/accountBook.js'
-	
+
 	import CustomTitle from '../components/CustomTitle.vue'
 	import moment from '../utils/moment.js'
 	export default {
@@ -128,8 +142,10 @@
 		},
 		data() {
 			return {
-				income: 0, //收入
-				expend: 0, //支出
+				status: 'more',
+				incPrice: 0, //收入
+				outPrice: 0, //支出
+				selected: [],
 				horizontal: 'right',
 				vertical: 'bottom',
 				pattern: {
@@ -143,9 +159,14 @@
 						backgroundColor: 'rgba(255, 97, 97, 1)'
 					}
 				}],
-				timeObj: [],
+				notesList: [],
 				userInfo: {},
-				accountBookInfo:{}
+				accountBookInfo: {},
+				form: {
+					page: 1,
+					limit: 20,
+				},
+				listTotal: 0
 			}
 		},
 		computed: {
@@ -154,44 +175,66 @@
 				if (!BUDGET) {
 					return 100
 				} else {
-					return Math.round((this.expend / BUDGET) * 100)
+					return ((this.outPrice / BUDGET) * 100).toFixed(2)
 				}
 			},
 			month() {
 				let m = new Date().getMonth() + 1
 				return m
+			},
+			endDate() {
+				return moment().format('YYYY-MM-DD')
 			}
 		},
 		onShow() {
+			// #ifdef APP-PLUS
 			this.getUserInfo()
-			accountBookList().then(res => {
-				this.accountBookInfo = res.data[0] 
+			accountBook().then(res => {
+				this.accountBookInfo = res.data[0]
+				this.form.page = 1
 				this.getList()
-				this.getMonthList()
+				this.getMonthTotal()
+			}).catch(e => {
+				console.log(e)
 			})
+			// #endif
+		},
+
+		onReachBottom() {
+			this.loadMore()
 		},
 		methods: {
 			toLink() {
 
 			},
+
+			loadMore() {
+				if (this.notesList.length >= this.listTotal) {
+					return
+				}
+				this.form.page++
+				this.getList()
+			},
+
 			setCurrentPrice() {
 				uni.navigateTo({
 					url: `/pages/budget/budget?budgetId=${this.accountBookInfo.id}&budget=${this.accountBookInfo.BUDGET}`
 				})
 			},
 
-			handlePrice(list = []) {
-				let total = 0
-				list.forEach(item => {
-					// 支出
-					if (item.INCOREXP === 0) {
-						total -= Number(item.PRICE)
-					} else {
-						// 收入
-						// total += Number(item.PRICE)
+			async handlePrice(time) {
+				let price = 0
+				let startTime = moment(time).startOf("day").valueOf('x')
+				let endTime = moment(time).endOf('day').valueOf('x')
+				try {
+					let result = await notePrice(startTime, endTime)
+					if (result.status == 200) {
+						price = Math.round((result.data[0].outPrice || 0) * 100) / 100
 					}
-				})
-				return Math.round(total * 100) / 100
+					return price
+				} catch (e) {
+					console.log(e)
+				}
 			},
 			handDays(key) {
 				let current = moment().format('YYYY-MM-DD')
@@ -205,6 +248,7 @@
 				}
 			},
 			handleIcons(type) {
+				let icons = [...icons_normal, ...icons_line]
 				let res = icons.find(item => item.id === type)
 				return res
 			},
@@ -212,7 +256,7 @@
 			async getUserInfo() {
 				try {
 					let result = await UserInfo()
-					if(result.status == 200){
+					if (result.status == 200) {
 						if (Array.isArray(result.data)) {
 							this.userInfo = result.data[0]
 						}
@@ -222,23 +266,17 @@
 				}
 			},
 
-			async getMonthList() {
+			async getMonthTotal() {
 				try {
 					let startTime = moment().startOf("month").valueOf('x')
 					let endTime = moment().endOf('month').valueOf('x')
-					let result = await getNotesList(endTime, startTime)
+					let result = await monthTotal(startTime, endTime)
 					if (result.status == 200) {
-						let income = 0
-						let expend = 0
-						result.data.forEach(data => {
-							if (data.INCOREXP == 0) {
-								expend += data.PRICE
-							} else {
-								income += data.PRICE
-							}
-						})
-						this.income = Math.round(income * 100) / 100
-						this.expend = Math.round(expend * 100) / 100
+						let data = result.data[0]
+						let outPrice = Math.round((data.outPrice || 0) * 100) / 100
+						let incPrice = Math.round((data.incPrice || 0) * 100) / 100
+						this.incPrice = incPrice
+						this.outPrice = outPrice
 					}
 				} catch (e) {
 					console.log(e, '///')
@@ -247,30 +285,50 @@
 
 			async getList() {
 				try {
-					let endTime = moment().endOf('day').valueOf('x')
-					let startTime = moment(endTime).subtract(30, 'day').valueOf('x')
-					let result = await getNotesList(endTime, startTime)
+					this.status = 'loading'
+					let form = this.form
+					let notesList = this.notesList
+					if (form.page == 1) {
+						notesList = []
+					}
+					let result = await getNotesList(form)
 					if (result.status == 200) {
-						let timeObj = {}
-						result.data.forEach(item => {
+						let arr = result.data.list
+						arr.forEach(async item => {
 							let date = moment(item.UPDATEDATE).format('YYYY-MM-DD')
-							if (timeObj[date]) {
-								timeObj[date].push(item)
+							let index = notesList.findIndex(res => res.date === date)
+							if (index >= 0) {
+								notesList[index].list.push(item)
 							} else {
-								timeObj[date] = []
-								timeObj[date].push(item)
+								let res = {
+									date,
+									list: [item],
+									total: 0
+								}
+								notesList.push(res)
+								try {
+									res.total = await this.handlePrice(date)
+								} catch (e) {
+									console.log(e)
+								}
 							}
 						})
-						this.timeObj = timeObj
+						this.listTotal = result.data.total
+						this.notesList = notesList
+						if (this.listTotal <= (form.page * form.limit + form.limit)) {
+							this.status = 'noMore'
+						} else {
+							this.status = 'more'
+						}
 					}
 				} catch (e) {
 					console.log(e, '///')
 				}
 			},
 
-			toMonthInfo() {
+			toMonthInfo(type) {
 				uni.navigateTo({
-					url: '/pages/charts/charts'
+					url: '/pages/charts/charts?type=' + type
 				})
 			},
 			onClickEditor() {
@@ -281,7 +339,8 @@
 			async onClickRemove(value) {
 				try {
 					let result = await deleteNote(value.id)
-					await this.getMonthList()
+					await this.getMonthTotal()
+					this.form.page = 1
 					await this.getList()
 				} catch (e) {
 					console.log(e)
@@ -291,6 +350,41 @@
 				uni.navigateTo({
 					url: '/pages/detail/detail?id=' + val.id
 				})
+			},
+			showCalendar() {
+				this.monthSwitch()
+				this.$refs.popup.open('top')
+			},
+			monthSwitch(e) {
+				let time = moment().format();
+				if (e) {
+					let T = `${e.year}-${e.month < 10 ? '0' + e.month:e.month}`
+					time = moment(T).format()
+
+				}
+				let beginTime = moment(time).startOf("month").valueOf('x')
+				let endTime = moment(time).endOf('month').valueOf('x')
+				let parmas = {
+					INCOREXP: 0,
+					beginTime,
+					endTime
+				}
+				this.getMonthData(parmas)
+			},
+
+			async getMonthData(params) {
+				try {
+					let result = await notesMonths(params)
+					if (result.status == 200) {
+						this.selected = result.data.map(data => {
+							data.date = data.monthDay
+							data.info = '-' + data.dayTotal
+							return data
+						})
+					}
+				} catch (e) {
+					console.log(e)
+				}
 			}
 		}
 
@@ -301,14 +395,14 @@
 	@mixin card--padding {
 		padding: 40rpx 30rpx;
 		box-sizing: border-box;
-	}
+	}CC
 
 	.out {
-		color: #ff4e4f
+		color: $uni-color-error
 	}
 
 	.inc {
-		color: #46be60;
+		color: $uni-color-success;
 	}
 
 	.content-pad {
@@ -325,12 +419,11 @@
 		font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 		font-size: 40rpx;
 		font-weight: bold;
-		// text-shadow: 2px 0px 1px #db8679;
-		color: #2e0f0f;
+		color: $uni-text-color;
 	}
 
 	.text--title {
-		color: #d93737;
+		color: $uni-color-error;
 		line-height: 80rpx;
 		height: 80rpx;
 	}
@@ -341,15 +434,14 @@
 	}
 
 	.space {
-		height: 80rpx;
-		font-size: 36rpx;
-		line-height: 80rpx;
+		height: 60rpx;
+		font-size: $uni-font-size-lg;
+		line-height: 60rpx;
 	}
 
 	.year {
 		position: relative;
-		background: rgba(255, 224, 226, 1);
-		// box-shadow: 0 35px 10px -25px #e79595;
+		background: $uni-card-color;
 		line-height: 2;
 		border-radius: 17px;
 		overflow: hidden;
@@ -374,10 +466,8 @@
 				height: 178px;
 				right: -100px;
 				top: -18px;
-				background-color: #ffc0c3;
+				background-color: $uni-card-color-grey;
 				border-radius: 49px;
-				/* -webkit-filter: blur(10px); */
-				/* filter: blur(10px); */
 				-webkit-transform: rotate(30deg);
 				transform: rotate(327deg);
 			}
@@ -391,17 +481,14 @@
 
 	.current {
 		position: relative;
-		background-color: #fff;
+		background-color: $uni-bg-color;
 		border-radius: 12px;
-		border: 1px solid rgba(243, 243, 243, 1);
-		// box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.06);
+		border: 1px solid $uni-border-color;
 		padding: 20rpx 30rpx 40rpx;
 		box-sizing: border-box;
-
 		.text--title {
-			color: #363636;
-			font-size: 28rpx;
-			// padding-top: 40rpx;
+			color: $uni-text-color;
+			font-size: $uni-font-size-base;
 		}
 	}
 
@@ -419,13 +506,13 @@
 
 		.incOrExp_out,
 		.incOrExp_inc {
-			font-size: 28rpx;
+			font-size: $uni-font-size-base;
 			line-height: 2;
 			width: 45%;
 			box-sizing: border-box;
 			padding: 20rpx 32rpx;
-			background: rgba(255, 255, 255, 1);
-			border: 1px solid rgba(243, 243, 243, 1);
+			background: $uni-bg-color;
+			border: 1px solid $uni-border-color;
 			border-radius: 12px;
 
 			.text-mg {
@@ -436,27 +523,32 @@
 		.incOrExp_out {
 			.incOrExp_icon {
 				transform: rotate(45deg);
-				background-color: #ff4e4f; //#46be60
+				background-color: $uni-color-error;
 			}
 		}
 
 		.incOrExp_inc {
 			.incOrExp_icon {
 				transform: rotate(-135deg);
-				background-color: #46be60; //#46be60
+				background-color: $uni-color-success; 
 			}
 		}
 	}
 
 
 	.next {
-		background-color: #fff;
+		background-color: $uni-bg-color;
 
 		.next__title {
 			display: flex;
-			padding: 20rpx 32rpx;
+			font-size: $uni-font-size-base;
+			color: $uni-text-color;
+			padding: 10rpx 32rpx 20rpx;
 			justify-content: space-between;
-			background-color: rgba(245, 245, 245, 1.0);
+			background-color: $uni-bg-color-grey;
+			.out{
+				color: $uni-text-color-error;
+			}
 		}
 
 		.next__item {
@@ -499,5 +591,10 @@
 				}
 			}
 		}
+	}
+
+	.calendar-space {
+		background-color: $uni-bg-color;
+		height: var(--status-bar-height);
 	}
 </style>

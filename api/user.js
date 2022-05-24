@@ -15,10 +15,10 @@ import {
 function openSqlite() {
 	return new Promise(async (resolve, reject) => {
 		try {
-			let boolean = plus.sqlite.isOpenDatabase(options);
-			if (!boolean) {
-				await openComDB()
-			}
+			// let boolean = plus.sqlite.isOpenDatabase(options);
+			// if (!boolean) {
+			// 	await openComDB()
+			// }
 			let sql =
 				"create table if not exists user([id] INTEGER PRIMARY KEY, [ALLMONEY] BIGINT(20),[CREATEDATE] TimeStamp NOT NULL DEFAULT (datetime('now','localtime')))"
 			await executeSQL(options.name, sql)
@@ -27,7 +27,7 @@ function openSqlite() {
 			let result = await executeSQL(options.name, insertSql)
 			resolve(toSuccessJSON(result))
 		} catch (e) {
-			console.log(err, '////////')
+			console.log(e)
 			reject(toFailJSON(result))
 		}
 	})

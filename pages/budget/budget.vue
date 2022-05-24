@@ -43,7 +43,7 @@
 		},
 		computed: {
 			disabled() {
-				if (this.price) {
+				if (Number(this.price)) {
 					return false
 				} else {
 					return true
@@ -90,7 +90,7 @@
 		},
 		onLoad(options) {
 			this.budgetId = options.budgetId
-			this.price = options.budget ? options.budget + '' : ''
+			this.price = Number(options.budget) ? options.budget + '' : ''
 		},
 		mounted() {
 			// this.onInput()
@@ -98,7 +98,7 @@
 		methods: {
 			async save() {
 				try {
-					if (!this.price) {
+					if (!Number(this.price)) {
 						return
 					}
 					uni.vibrateShort()
@@ -169,7 +169,7 @@
 				position: relative;
 				display: flex;
 				align-items: center;
-				font-size: 70rpx;
+				font-size: 80rpx;
 				font-weight: 600;
 				line-height: 1.8;
 

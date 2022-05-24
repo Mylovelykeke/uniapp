@@ -24,20 +24,34 @@
 			<text :class="{active:incOrExp == 1}" @click="selectType(1)">收入</text>
 		</view>
 		<!-- iconfont -->
-		<view class="editor__icon">
-			<view class="editor__icon--radio" v-for="(val,index) in icons" :key="index" @click="selectIcon(val.id)"
-				:class="{active:val.id == iconType}">
-				<!-- <uni-icons  custom-prefix="iconfont"  :type="val.name" size="30" :color="val.name == icon ? '#ff7245':'#5b5b5b'"></uni-icons> -->
-				<text class="t-icon" :class="[{'active':val.id == iconType},val.name]"></text>
-				<view>{{val.title}}</view>
-			</view>
-		</view>
+		<swiper :indicator-dots="true" indicator-active-color="#a3a3a3" style="height: 260px;background-color: #fff;">
+			<swiper-item>
+				<view class="editor__icon">
+					<view class="editor__icon--radio" v-for="(val,index) in iconsObject.icon" :key="index"
+						@click="selectIcon(val.id)" :class="{active:val.id == iconType}">
+						<!-- <uni-icons  custom-prefix="iconfont"  :type="val.name" size="30" :color="val.name == icon ? '#ff7245':'#5b5b5b'"></uni-icons> -->
+						<text class="t-icon" :class="[{'active':val.id == iconType},val.name]"></text>
+						<view>{{val.title}}</view>
+					</view>
+				</view>
+			</swiper-item>
+			<swiper-item>
+				<view class="editor__icon">
+					<view class="editor__icon--radio" v-for="(val,index) in iconsObject.lineIcon" :key="index"
+						@click="selectIcon(val.id)" :class="{active:val.id == iconType}">
+						<!-- <uni-icons  custom-prefix="iconfont"  :type="val.name" size="30" :color="val.name == icon ? '#ff7245':'#5b5b5b'"></uni-icons> -->
+						<text class="iconfont" style="font-size: 33px;color: #ff9799;" :class="[{'active':val.id == iconType},val.name]"></text>
+						<view>{{val.title}}</view>
+					</view>
+				</view>
+			</swiper-item>
+		</swiper>
 
 		<!-- 备注 -->
 		<view class="editor__remark">
 			<text class="editor__text">备注</text>
 			<textarea v-model="remark" placeholder="写点什么..." cols="30" rows="10"></textarea>
-			<view v-for="(val,index) in tempFilePaths" class="editor__remark_extra">
+			<view v-for="(val,index) in tempFilePaths" :key="index" class="editor__remark_extra">
 				<view @click="previewImage(index)">
 					<uni-icons type="images" size="20"></uni-icons>
 					<text>&nbsp;&nbsp;附件{{index + 1}}</text>
@@ -61,7 +75,7 @@
 			</view>
 			<view class="editor_btn" :class="{disabled:disabled}" @click="save(false)">确定添加</view>
 		</view>
-		<uni-popup ref="popup" type="bottom">
+		<uni-popup ref="popup" type="bottom" :maskShow="false">
 			<!-- 键盘 -->
 			<InputNumber @change="onInputNumer" @confirm="onClose" />
 		</uni-popup>
@@ -75,7 +89,8 @@
 		getNotesList
 	} from '../../api/editor.js'
 	import {
-		icons
+		icons_normal,
+		icons_line
 	} from '../../utils/config.js'
 	import moment from '../../utils/moment.js'
 	import CustomTitle from '@/components/CustomTitle.vue'
@@ -86,7 +101,7 @@
 		},
 		computed: {
 			endTime() {
-				return moment(moment().add(15, 'days')).valueOf('x')
+				return moment().valueOf('x')
 			},
 			unit() {
 				let name = ''
@@ -120,7 +135,7 @@
 				return name
 			},
 			disabled() {
-				if (this.price) {
+				if (Number(this.price)) {
 					return false
 				} else {
 					return true
@@ -136,7 +151,10 @@
 				notesType: 0,
 				time: new Date().getTime(),
 				focus: false,
-				icons: icons,
+				iconsObject: {
+					icon:icons_normal,
+					lineIcon:icons_line
+				},
 				tempFilePaths: []
 
 			};
@@ -147,10 +165,12 @@
 		},
 		methods: {
 			save(flag) {
-				if (!this.price) {
+				if (!Number(this.price)) {
 					return
 				}
-				uni.vibrateShort()
+				if (uni.getSystemInfoSync().platform == "android") {
+					uni.vibrateShort()
+				}
 				let timestamp = this.time
 				if (!this.time) {
 					timestamp = new Date().getTime()
@@ -168,10 +188,10 @@
 					if (flag) {
 						uni.showToast({
 							title: '再记一笔！',
-							icon:'none',
+							icon: 'none',
 							duration: 2000
 						});
-						Object.assign(this.$data, this.$options.data()) 
+						Object.assign(this.$data, this.$options.data())
 					} else {
 						uni.navigateBack()
 					}
@@ -272,7 +292,7 @@
 				position: relative;
 				display: flex;
 				align-items: center;
-				font-size: 70rpx;
+				font-size: 80rpx;
 				font-weight: 600;
 				line-height: 1.8;
 
@@ -359,7 +379,7 @@
 
 				&.active {
 					background-color: #fbeaea;
-					color: #ff7245;
+					color: #ff7245 !important;
 				}
 			}
 		}

@@ -20,14 +20,16 @@
 				arr: [1, 2, 3, 4, 5, 6, 7, 8, 9, '.', '0', 'delete']
 			};
 		},
-		methods:{
-			onKeyCode(value){
-				this.$emit('change',value)
-				uni.vibrateShort({
-					success: function () {}
-				});
+		methods: {
+			onKeyCode(value) {
+				this.$emit('change', value)
+				if (uni.getSystemInfoSync().platform == "android") {
+					uni.vibrateShort({
+						success: function() {}
+					});
+				}
 			},
-			confirm(){
+			confirm() {
 				this.$emit('confirm')
 			}
 		}
@@ -38,6 +40,7 @@
 	.keyboard {
 		background-color: #f7f7f7;
 		padding-bottom: 10rpx;
+
 		.keyboard_title {
 			padding: 20rpx 32rpx;
 			display: flex;
@@ -52,7 +55,8 @@
 			display: inline-block;
 			box-sizing: border-box;
 			width: 33.3%;
-			padding:0px 1px 2px 1px;
+			padding: 0px 1px 2px 1px;
+
 			.btn_key {
 				background-color: #fff;
 				border-radius: 5px;
@@ -60,18 +64,21 @@
 				line-height: 100rpx;
 				text-align: center;
 				font-size: 24px;
-				.iconfont{
+
+				.iconfont {
 					font-size: 28px;
 				}
+
 				&.focus {
 					background-color: #cbcdcf;
 				}
-				&:active{
+
+				&:active {
 					background-color: #efeff0;
 				}
 			}
 
-			
+
 		}
 	}
 </style>

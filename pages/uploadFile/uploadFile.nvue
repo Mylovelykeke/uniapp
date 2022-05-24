@@ -1,0 +1,103 @@
+<template>
+	<view class="webview_content">
+		<view class="webview_title">
+			<view :style="{height: height + 'px'}"></view>
+			<uni-nav-bar @clickLeft	="goback()" left-icon="left" title="文件导入" backgroundColor="rgba(245, 245, 245, 1.0)"/>
+		</view>
+		<web-view class="webview" ref="webview" src="https://static-08a53f38-d459-49bc-a347-4ba62f188085.bspapp.com/" @onPostMessage="onMessage"></web-view>
+	</view>
+</template>
+
+<script>
+	import CustomTitle from '../../components/CustomTitle.vue'
+	import moment from '../../utils/moment.js'
+	import {
+		editorToAdd
+	} from '../../api/editor.js'
+	var wv;
+	export default {
+		components: {
+			CustomTitle
+		},
+		computed: {},
+		data() {
+			return {
+				loadPercent: 20,
+				height:20
+			};
+		},
+		onLoad() {
+			let that = this
+			uni.getSystemInfo({
+				success(res) {
+					that.height = res.statusBarHeight
+				}
+			})
+		},
+		onReady() {
+			// #ifdef APP-PLUS
+			// var currentWebview = this.$mp.page.$getAppWebview() //获取当前页面的webview对象
+			wv = this.$refs.webview
+			wv.setStyle({
+				top: uni.getSystemInfoSync().statusBarHeight + 44
+			})
+			// #endif
+		},
+		beforeDestroy() {
+			uni.hideNavigationBarLoading()
+		},
+		methods: {
+			goback() {
+				uni.navigateBack()
+			},
+			onMessage(e) {
+				let data = e.detail.data[0].excel
+				for (let i in data) {
+					if (data[i].length && data[i][0].hasOwnProperty('微信支付账单明细')) {
+						this.setWxExcel(data[i])
+					}
+				}
+			},
+			async setWxExcel(list) {
+				let newList = list.splice(14)
+				let arr = []
+				try {
+					newList.forEach(item => {
+						let incOrExp = item['__EMPTY_3'] == '支出' ? 0 : 1
+						let time = item['微信支付账单明细']
+						let price = Number(item['__EMPTY_4'].slice(1))
+						let updateDate = moment(time).valueOf('x')
+						let remark =
+							`交易对方：${item['__EMPTY_1']};\n商品：${item['__EMPTY_2']};\n收支：${item['__EMPTY_3']};\n 支付方式：${item['__EMPTY_5']};\n 金额：${item['__EMPTY_4']}; `
+						let params = {
+							iconType: '',
+							notesType: 0,
+							price,
+							remark,
+							incOrExp,
+							updateDate
+						}
+						arr.push(editorToAdd(params))
+						this.$refs.webview.evalJs(`roll('${remark}')`)
+					})
+					await Promise.all(arr)
+					plus.nativeUI.alert('导入成功')
+				} catch (e) {
+					plus.nativeUI.alert('导入失败')
+				}
+				let result = await Promise.all(arr)
+					console.log(result,'result')
+			}
+		}
+	}
+</script>
+
+<style lang="scss">
+	.webview_content {
+		flex: 1;
+	}
+	.webview{
+		flex: 1;
+	}
+
+</style>

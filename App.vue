@@ -1,12 +1,22 @@
 <script>
 	import {
-		closeDB
+		openComDB,
+		closeDB,
+		options
 	} from './api/sqlite/sqlite.js'
 	export default {
-		onLaunch:function() {
+		onLaunch: function() {
+			console.log('app lauch')
 		},
-		onShow: function() {
-			console.log('App Show')
+		onShow: async function() {
+			// #ifdef APP-PLUS
+			try {
+				let boolean = plus.sqlite.isOpenDatabase(options);
+				if (!boolean) {
+					await openComDB()
+				}
+			} catch {}
+			// #endif
 		},
 		onHide: function() {
 			// #ifdef APP-PLUS
@@ -19,7 +29,7 @@
 	}
 </script>
 
-<style>
+<style lang="scss" >
 	@import "@/static/font/iconfont.css";
 	@import "@/static/font/iconfont-weapp-icon.css";
 
@@ -29,9 +39,8 @@
 	}
 
 	page {
-		background: rgba(245, 245, 245, 1.0);
+		background: $uni-bg-color-grey;
 	}
-
 	.content {
 		padding: 32rpx;
 		box-sizing: border-box;

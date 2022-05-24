@@ -7,7 +7,7 @@ export const toSuccessJSON = (data)=>{
 
 
 export const toFailJSON = (err)=>{
-	console.log(err,'====>')
+	uni.report('sql操作',err)
 	return {
 		status:500,
 		data:err

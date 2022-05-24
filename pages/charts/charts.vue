@@ -1,164 +1,135 @@
 <template>
-	<view class="content">
-		<!-- <view class="card">
-			<view class="card__shadow">
-
+	<view>
+		<CustomTitle>
+			<template v-slot:left>
+				<uni-icons type="left" size="20" @click="goback()"></uni-icons>
+			</template>
+		</CustomTitle>
+		<uni-segmented-control :current="current" :values="items" @clickItem="onClickItem" styleType="text"
+			activeColor="#ea6163"></uni-segmented-control>
+		<view class="content">
+			<!-- tab 切换显示 -->
+			<view v-if="current === 0">
+				<view class="chart_switch">
+					<picker mode="date" fields="month" :value="month" start="2010-01-01" :end="endDate"
+						@change="bindMonthChange">
+						<view class="uni-input">
+							<text>{{month}}</text>
+							<uni-icons type="bottom" size="14" color="#666"></uni-icons>
+						</view>
+					</picker>
+					<view>
+						<uni-data-checkbox v-model="value" mode="tag" :multiple="false" :localdata="range">
+						</uni-data-checkbox>
+					</view>
+				</view>
+				<view class="tab" v-if="value === 0">
+					<OutChart :date="month" />
+				</view>
+				<view class="tab" v-if="value === 1">
+					<InChart :date="month" />
+				</view>
 			</view>
-		</view> -->
-		<view class="charts-box">
-			<qiun-data-charts type="column" :opts="opts1" :chartData="chartData1" />
-		</view>
-		<view class="charts-box">
-			<qiun-data-charts type="ring" :opts="opts2" :chartData="chartData2" />
-		</view>
-		<text class="expenses">收支明细</text>
-		<view class="card-list">
-
+			<view v-else-if="current === 1">
+				<view class="chart_switch">
+					<picker mode="date" fields="year" :value="year" start="2010-01-01" :end="endDate"
+						@change="bindYearChange">
+						<view class="uni-input">
+							<text>{{year}}</text>
+							<uni-icons type="bottom" size="14" color="#666"></uni-icons>
+						</view>
+					</picker>
+					<view>
+						<uni-data-checkbox v-model="value" mode="tag" :multiple="false" :localdata="range">
+						</uni-data-checkbox>
+					</view>
+				</view>
+				<view class="tab" v-if="value === 0">
+					<YearOutChart :date="year"/>
+				</view>
+				<view class="tab" v-if="value === 1">
+					<YearInChart :date="year"/>
+				</view>
+			</view>
 		</view>
 	</view>
-
 </template>
 <script>
+	import CustomTitle from '@/components/CustomTitle.vue'
+	import OutChart from '@/components/OutChart.vue'
+	import InChart from '@/components/InChart.vue'
+	import YearOutChart from '@/components/yearOutChart.vue'
+	import YearInChart from '@/components/yearInChart.vue'
+	import moment from '@/utils/moment.js'
 	export default {
+		components: {
+			CustomTitle,
+			OutChart,
+			InChart,
+			YearOutChart,
+			YearInChart
+		},
 		data() {
 			return {
-				chartData1: {
-					categories: ["2016", "2017", "2018", "2019", "2020", "2021"],
-					series: [{
-						name: "目标值",
-						data: [35, 36, 31, 33, 0, 34]
-					}]
-				},
-				opts1: {
-					color: ["#3366ff"],
-					padding: [15, 15, 0, 5],
-					legend: {
-						show: false
+				value: 0,
+				current: 0,
+				month: '',
+				year:'',
+				endDate: moment().format('YYYY-MM-DD'),
+				items: ['月账单', '年账单'],
+				range: [{
+						value: 0,
+						text: '支出',
 					},
-					xAxis: {
-						disableGrid: true
+					{
+						value: 1,
+						text: '收入',
 					},
-					yAxis: {
-						disabled: true,
-						disableGrid: true
-					},
-					extra: {
-						tooltip: {
-							showBox: false
-						},
-						column: {
-							type: "group",
-							linearType:"custom",
-							customColor:["#1939b7"],
-							width: 25,
-							activeBgColor: "#000000",
-							activeBgOpacity: 0.08
-						}
-					}
-				},
-				chartData2: {},
-				//您可以通过修改 config-ucharts.js 文件中下标为 ['ring'] 的节点来配置全局默认参数，如都是默认参数，此处可以不传 opts 。实际应用过程中 opts 只需传入与全局默认参数中不一致的【某一个属性】即可实现同类型的图表显示不同的样式，达到页面简洁的需求。
-				opts2: {
-					rotate: false,
-					rotateLock: false,
-					color: ["#ff7245", "#6dc12c", "#309eff"],
-					padding: [0, 0, 0, 0],
-					dataLabel: true,
-					legend: {
-						show: true,
-						position: "bottom",
-						lineHeight: 25
-					},
-					series: {
-						show: false
-					},
-					title: {
-						name: "",
-					},
-					subtitle: {
-						name: "",
-					},
-					extra: {
-						tooltip: {
-							show: false
-						},
-						ring: {
-							border: false,
-							ringWidth: 40,
-							activeOpacity: 0.5,
-							activeRadius: 10,
-							offsetAngle: 0,
-							labelWidth: 15,
-							borderWidth: 0,
-							borderColor: "#FFFFFF"
-						}
-					}
-				}
-			};
+				]
+			}
 		},
-		onReady() {
-			this.getServerData();
+		onLoad(options) {
+			if (options.type) {
+				this.value = Number(options.type)
+			}
+		},
+		created() {
+			this.month = moment().format('YYYY-MM')
+			this.year = moment().format('YYYY')
 		},
 		methods: {
-			getServerData() {
-				//模拟从服务器获取数据时的延时
-				setTimeout(() => {
-					//模拟服务器返回数据，如果数据格式和标准格式不同，需自行按下面的格式拼接
-					let res = {
-						series: [{
-							data: [{
-								"name": "一班",
-								"value": 50
-							}, {
-								name: "二班",
-								value: 10
-							}, {
-								name: "二班",
-								value: 30
-							}]
-						}]
-					};
-					this.chartData2 = JSON.parse(JSON.stringify(res));
-				}, 500);
+			onClickItem(e) {
+				if (this.current != e.currentIndex) {
+					this.current = e.currentIndex
+					this.value = 0
+				}
 			},
-		}
+			goback() {
+				uni.navigateBack()
+			},
+
+			bindMonthChange: function(e) {
+				this.month = e.detail.value
+			},
+			bindYearChange: function(e) {
+				this.year = e.detail.value
+			},
+		},
 	}
 </script>
 <style lang="scss" scoped>
 	.content {
+		padding-top: 10px;
 
-		.card {
-			position: relative;
-			height: 200px;
-			background: rgba(255, 92, 101, 1);
-			box-shadow: 0 30px 10px -20px #ccc;
-			border-radius: 30px;
-		}
-
-		.charts-box {
-			height: 220px;
-			background: white;
-			border-radius: 12px;
-			padding: 10px;
-			margin-bottom: 10px;
-		}
-
-		.expenses {
+		.chart_switch {
 			display: flex;
-			letter-spacing: 0.2px;
-			font-size: 16px;
-			line-height: 28px;
-			margin: 10px 0;
-		}
-
-		.card-list {
-			height: 150rpx;
-			background: white;
-			border-radius: 12px;
-			display: flex;
-			justify-content: flex-start;
-			align-items: flex-start;
-			padding: 16px 16px 16px 16px;
+			justify-content: space-between;
+			align-items: center;
+			.uni-input{
+				text{
+					margin-right: 6px;
+				}
+			}
 		}
 	}
 </style>

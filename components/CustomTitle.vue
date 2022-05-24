@@ -45,9 +45,9 @@
 		width: 100%;
 		left: 0;
 		top: 0;
-		z-index: 999;
+		z-index: 1;
 	}
-
+	
 	.custom_default {
 		height: var(--status-bar-height);
 	}
