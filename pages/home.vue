@@ -77,13 +77,13 @@
 			</view>
 		</view>
 		<template v-if="notesList.length">
-			<view class="next" v-for="(val,index) in notesList" :key="val.date">
+			<view class="next" v-for="(val,index) in notesList" :key="index">
 				<view class="next__title">
 					<text>{{handDays(val.date)}}</text>
 					<text class="out" v-if="val.total">{{'-'+val.total}}</text>
 				</view>
 				<uni-swipe-action>
-					<uni-swipe-action-item :right-options="options" v-for="(val,index) in val.list" :key="val.id"
+					<uni-swipe-action-item :right-options="options" v-for="(val,idx) in val.list" :key="val.id"
 						style="border-top: 1px solid #eee;" @click="onClickRemove(val)">
 						<view class="next__item" @click="onClickDetail(val)">
 							<view class="next__item--fix">
