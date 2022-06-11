@@ -86,7 +86,6 @@
 					plus.nativeUI.alert('导入失败')
 				}
 				let result = await Promise.all(arr)
-					console.log(result,'result')
 			}
 		}
 	}

@@ -14,7 +14,7 @@
 					src="https://vkceyugu.cdn.bspapp.com/VKCEYUGU-08a53f38-d459-49bc-a347-4ba62f188085/c35ff3b4-39ba-4783-815a-1105fac030fe.jpg"
 					mode="scaleToFill"></image>
 				<view class="card_content">
-					<text class="title">{{item.ACCOUNTNAME}}</text>
+					<text class="title">{{item.account_name}}</text>
 					<!-- <view class="desc">
 						<text>月支出:</text>
 						<text>-300</text>
